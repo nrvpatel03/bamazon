@@ -12,7 +12,7 @@ var connection = mysql.createConnection({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE
 });
-start();
+
 function start(){
     inquirer.prompt([
         {
@@ -26,25 +26,57 @@ function start(){
     ]).then(function(response){
         switch(response.initialChoice){
             case "View Products for Sale":
-            //function
+            viewProdsForSale();
             break;
             case "View Low Inventory":
-            //function
+            viewLowInv();
             break;
             case "Add to Inventory":
-            //function
+            addToInv();
             break;
             case "Add a New Product":
-            //function
+            addNewProd();
             break;
             default:
             break;
         }
     })
 }
-function viewProdsForSale(){
 
+function viewProdsForSale(){
+    connection.query("SELECT * FROM products",function(error,result){
+        if (error) throw error;
+        var objectArr = [];
+        for(var i = 0; i < result.length; i++){
+            var tableObject =
+            {
+                ID: chalk.blue(result[i].item_id),
+                Name: chalk.bold(result[i].product_name),
+                Price: chalk.green("$" + result[i].price.toFixed(2))
+            }
+            objectArr.push(tableObject);
+        }
+        console.log(asTable(objectArr));
+        inquirer.prompt([
+            {
+                type: "list",
+                message: "Would you like to do something else?",
+                choices: ["Yes","No"],
+                name: "goAgainChoice"
+            }
+        ]).then(function(choice){
+            if(choice.goAgainChoice === "Yes"){
+                start();
+            }else{
+                console.log("Thanks for doing Manager stuff!");
+                connection.end();
+            }
+        })
+    })
 }
+
+
+
 function viewLowInv(){
 
 }
@@ -54,3 +86,4 @@ function addToInv(){
 function addNewProd(){
 
 }
+start();
