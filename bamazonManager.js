@@ -42,7 +42,23 @@ function start(){
         }
     })
 }
-
+function goAgain(){
+    inquirer.prompt([
+        {
+            type: "list",
+            message: "Would you like to do something else?",
+            choices: ["Yes","No"],
+            name: "goAgainChoice"
+        }
+    ]).then(function(choice){
+        if(choice.goAgainChoice === "Yes"){
+            start();
+        }else{
+            console.log("Thanks for doing Manager stuff!");
+            connection.end();
+        }
+    })
+}
 function viewProdsForSale(){
     connection.query("SELECT * FROM products",function(error,result){
         if (error) throw error;
@@ -57,31 +73,49 @@ function viewProdsForSale(){
             objectArr.push(tableObject);
         }
         console.log(asTable(objectArr));
-        inquirer.prompt([
-            {
-                type: "list",
-                message: "Would you like to do something else?",
-                choices: ["Yes","No"],
-                name: "goAgainChoice"
-            }
-        ]).then(function(choice){
-            if(choice.goAgainChoice === "Yes"){
-                start();
-            }else{
-                console.log("Thanks for doing Manager stuff!");
-                connection.end();
-            }
-        })
+        goAgain();
     })
 }
 
 
 
 function viewLowInv(){
-
+    connection.query("SELECT * FROM products WHERE stock_quantity < 5",function(error,result){
+        if (error) throw error;
+        var objectArr = [];
+        for(var i = 0; i < result.length; i++){
+            choicesArr.push(result[i].item_id);
+            var tableObject =
+            {
+                ID: chalk.blue(result[i].item_id),
+                Name: chalk.bold(result[i].product_name),
+                Price: chalk.green("$" + result[i].price.toFixed(2)),
+                Quantity: chalk.red(result[i].stock_quantity)
+            }
+            objectArr.push(tableObject);
+        }
+        console.log(asTable(objectArr));
+        goAgain();
+    })
 }
 function addToInv(){
-
+    connection.query("SELECT item_id FROM products",function(error,result){
+        if (error) throw error;
+        var choiceArr = [];
+        for(var i = 0; i < result.length; i++){
+            choiceArr.push(result[i].item_id.toString());
+        }
+        inquirer.prompt([
+            {
+                type: "list",
+                message: "What is the ID of the item you want to stock?",
+                choices: choiceArr,
+                name: "idChoice"
+            }
+        ]).then(function(response){
+            
+        })
+    })
 }
 function addNewProd(){
 
