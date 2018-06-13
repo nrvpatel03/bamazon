@@ -111,9 +111,26 @@ function addToInv(){
                 message: "What is the ID of the item you want to stock?",
                 choices: choiceArr,
                 name: "idChoice"
+            },
+            {
+                type: "input",
+                message: "How many would you like to add?",
+                validate: function(value){
+                    if(!isNaN(value)){
+                        return true;
+                    }
+                    return false
+                },
+                name: "quantity"
             }
         ]).then(function(response){
             
+        connection.query("UPDATE products SET ? WHERE ?",
+            [
+                {
+                    stock_quantity: 1
+                }
+            ])
         })
     })
 }
