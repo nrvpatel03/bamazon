@@ -4,7 +4,7 @@ var inquirer = require("inquirer");
 var mysql = require("mysql");
 var chalk = require("chalk");
 var asTable = require("as-table");
-//testing
+
 var connection = mysql.createConnection({
     host: process.env.DB_LOCALHOST,
     port: process.env.DB_PORT,
@@ -13,17 +13,13 @@ var connection = mysql.createConnection({
     database: process.env.DB_DATABASE
 });
 
-//side notes, prices are green, items are bold, ids are blue.
-//function to display items from database then ask what they want to buy.
+
 function start(){
-    connection.query("SELECT * FROM products",function(error,result){
+    connection.query("SELECT * FROM products",function(error, result){
         if (error) throw error;
         var objectArr = [];
-        for(var i=0; i<result.length; i++){
-            // console.log(chalk.blue("ID: " + result[i].item_id + "  ") + 
-            // chalk.bold(result[i].product_name) + 
-            // chalk.green("  Price: $" + result[i].price.toFixed(2)));
-            var tableObject = 
+        for(var i = 0; i < result.length; i++){
+            var tableObject =
             {
                 ID: chalk.blue(result[i].item_id),
                 Name: chalk.bold(result[i].product_name),
@@ -33,7 +29,7 @@ function start(){
         }
         console.log(asTable(objectArr));
         inquirer.prompt([
-            {    
+            {
                 type: "list",
                 message: chalk.yellow("What is the ID of the item you want to buy?"),
                 choices: function(){
@@ -57,32 +53,31 @@ function start(){
                 name: "quantity"
             }
         ]).then(function(response){
-            // console.log(response.choiceID);
-            // console.log(response.quantity);
-            //parse int when using this.
-            //if responce.choice id's quantity is lower than actual quantity, console log sorry else run update function
-            connection.query("SELECT stock_quantity,price FROM products WHERE ?",
+            var numQuantity = parseInt(response.quantity);
+            connection.query(
+                "SELECT stock_quantity,price,product_name FROM products WHERE ?",
                 {
                     item_id: response.choiceID
                 },
-                function(error,selected){
-                    if (error) throw err;
-                    if(parseInt(response.quantity) > selected[0].stock_quantity){
+                function(error, selected){
+                    if (error) throw error;
+                    var data = selected[0];
+                    if(numQuantity > data.stock_quantity){
                         console.log(chalk.red("INSUFFICIENT QUANTITY PLEASE TRY AGAIN"));
-                        connection.end();
+                        askAgain();
+                        //connection.end();
                     }else{
-                        //UPDATE!!!
-                        updateQuantity(response.choiceID,parseInt(response.quantity),
-                        selected[0].stock_quantity,selected[0].price);
+                        updateQuantity(response.choiceID, numQuantity,
+                        data.stock_quantity, data.price, data.product_name);
                     }
                 })
         });
     })
 }
-//function for update
-function updateQuantity(userChoiceId,userQuantity,stockQuan,itemPrice){
+
+function updateQuantity(userChoiceId, userQuantity, 
+    stockQuan, itemPrice, item_Name){
     var updateQuantity = stockQuan - userQuantity;
-    
     connection.query("UPDATE products SET ? WHERE ?",
         [
             {
@@ -92,11 +87,31 @@ function updateQuantity(userChoiceId,userQuantity,stockQuan,itemPrice){
                 item_id: userChoiceId
             }
         ],function(error){
-            if(error)throw error;
-            console.log("TOTAL COST: $" + parseFloat(itemPrice) * userQuantity);
-            connection.end();
+            if(error) throw error;
+            var total = parseFloat(itemPrice) * userQuantity;
+            console.log(chalk.bold("TOTAL COST FOR THE ITEM(S): ") 
+                + chalk.green("$" +total.toFixed(2)));
+            console.log("YOU BOUGHT " + chalk.blue(userQuantity) 
+                + " " + chalk.yellow(item_Name 
+                + "(s)"));
+            askAgain();
         })
 }
+function askAgain(){
+    inquirer.prompt([
+        {
+            type: "list",
+            choices: ["Yes","No"],
+            message: "Would you like to buy another item?",
+            name: "again"
+        }
+    ]).then(function(response){
+        if(response.again === "Yes"){
+            start();
+        }else{
+            console.log("Thanks for shopping!");
+            connection.end();
+        }
+    })
+}
 start();
-
-
