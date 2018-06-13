@@ -20,10 +20,37 @@ function start(){
         for(var i=0; i<result.length; i++){
             console.log(chalk.blue("ID: " + result[i].item_id + "  ") + 
             chalk.bold(result[i].product_name) + 
-            chalk.green("  Price: $" + result[i].price));
+            chalk.green("  Price: $" + result[i].price.toFixed(2)));
         }
-        
-        connection.end();
+        inquirer.prompt([
+            {    
+                type: "list",
+                message: chalk.yellow("What is the ID of the item you want to buy?"),
+                choices: function(){
+                    var choicesArr = [];
+                    for(var i = 0; i < result.length; i++){
+                        choicesArr.push(result[i].item_id.toString());
+                    }
+                    return choicesArr;
+                },
+                name: "choiceID"
+            },
+            {
+                type: "input",
+                message: chalk.yellow("How many would you like to buy?"),
+                validate: function(value){
+                    if(isNaN(value) === false){
+                        return true;
+                    }
+                    return false;
+                },
+                name: "quantity"
+            }
+        ]).then(function(response){
+            console.log(response.choiceID);
+            console.log(response.quantity);
+            connection.end();
+        });
     })
 }
 start();
