@@ -47,12 +47,45 @@ function start(){
                 name: "quantity"
             }
         ]).then(function(response){
-            console.log(response.choiceID);
-            console.log(response.quantity);
-            connection.end();
+            // console.log(response.choiceID);
+            // console.log(response.quantity);
+            //parse int when using this.
+            //if responce.choice id's quantity is lower than actual quantity, console log sorry else run update function
+            connection.query("SELECT stock_quantity,price FROM products WHERE ?",
+                {
+                    item_id: response.choiceID
+                },
+                function(error,selected){
+                    if (error) throw err;
+                    if(parseInt(response.quantity) > selected[0].stock_quantity){
+                        console.log(chalk.red("INSUFFICIENT QUANTITY PLEASE TRY AGAIN"));
+                        connection.end();
+                    }else{
+                        //UPDATE!!!
+                        updateQuantity(response.choiceID,parseInt(response.quantity),selected[0].stock_quantity,selected[0].price);
+                    }
+                })
         });
     })
 }
+//function for update
+function updateQuantity(userChoiceId,userQuantity,stockQuan,itemPrice){
+    var updateQuantity = stockQuan - userQuantity;
+    
+    connection.query("UPDATE products SET ? WHERE ?",
+        [
+            {
+                stock_quantity: updateQuantity
+            },
+            {
+                item_id: userChoiceId
+            }
+        ],function(error){
+            if(error)throw error;
+            console.log("TOTAL COST: $" + parseFloat(itemPrice) * userQuantity);
+            connection.end();
+        })
+}
 start();
-//function to prompt user with id of what they want to buy and how many
+
 
