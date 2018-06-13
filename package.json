@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/nrvpatel03/bamazon#readme",
   "dependencies": {
+    "as-table": "^1.0.33",
     "chalk": "^2.4.1",
     "dotenv": "^6.0.0",
     "inquirer": "^6.0.0",

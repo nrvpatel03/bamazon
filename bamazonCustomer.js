@@ -3,6 +3,7 @@ require("dotenv").config();
 var inquirer = require("inquirer");
 var mysql = require("mysql");
 var chalk = require("chalk");
+var asTable = require("as-table");
 //testing
 var connection = mysql.createConnection({
     host: process.env.DB_LOCALHOST,
@@ -17,11 +18,20 @@ var connection = mysql.createConnection({
 function start(){
     connection.query("SELECT * FROM products",function(error,result){
         if (error) throw error;
+        var objectArr = [];
         for(var i=0; i<result.length; i++){
-            console.log(chalk.blue("ID: " + result[i].item_id + "  ") + 
-            chalk.bold(result[i].product_name) + 
-            chalk.green("  Price: $" + result[i].price.toFixed(2)));
+            // console.log(chalk.blue("ID: " + result[i].item_id + "  ") + 
+            // chalk.bold(result[i].product_name) + 
+            // chalk.green("  Price: $" + result[i].price.toFixed(2)));
+            var tableObject = 
+            {
+                ID: chalk.blue(result[i].item_id),
+                Name: chalk.bold(result[i].product_name),
+                Price: chalk.green("$" + result[i].price.toFixed(2))
+            }
+            objectArr.push(tableObject);
         }
+        console.log(asTable(objectArr));
         inquirer.prompt([
             {    
                 type: "list",
@@ -62,7 +72,8 @@ function start(){
                         connection.end();
                     }else{
                         //UPDATE!!!
-                        updateQuantity(response.choiceID,parseInt(response.quantity),selected[0].stock_quantity,selected[0].price);
+                        updateQuantity(response.choiceID,parseInt(response.quantity),
+                        selected[0].stock_quantity,selected[0].price);
                     }
                 })
         });
