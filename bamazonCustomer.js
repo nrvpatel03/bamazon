@@ -13,7 +13,6 @@ var connection = mysql.createConnection({
     database: process.env.DB_DATABASE
 });
 
-
 function start(){
     connection.query("SELECT * FROM products",function(error, result){
         if (error) throw error;
@@ -89,11 +88,14 @@ function updateQuantity(userChoiceId, userQuantity,
         ],function(error){
             if(error) throw error;
             var total = parseFloat(itemPrice) * userQuantity;
+
             console.log(chalk.bold("TOTAL COST FOR THE ITEM(S): ") 
                 + chalk.green("$" +total.toFixed(2)));
+
             console.log("YOU BOUGHT " + chalk.blue(userQuantity) 
                 + " " + chalk.yellow(item_Name 
                 + "(s)"));
+
             askAgain();
         })
 }
@@ -110,6 +112,7 @@ function askAgain(){
             start();
         }else{
             console.log("Thanks for shopping!");
+            
             connection.end();
         }
     })

@@ -5,13 +5,15 @@ var mysql = require("mysql");
 var chalk = require("chalk");
 var asTable = require("as-table");
 
-var connection = mysql.createConnection({
+var connection = mysql.createConnection(
+    {
     host: process.env.DB_LOCALHOST,
     port: process.env.DB_PORT,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE
-});
+    }
+);
 
 function start(){
     inquirer.prompt([
@@ -28,15 +30,19 @@ function start(){
             case "View Products for Sale":
             viewProdsForSale();
             break;
+
             case "View Low Inventory":
             viewLowInv();
             break;
+
             case "Add to Inventory":
             addToInv();
             break;
+
             case "Add a New Product":
             addNewProd();
             break;
+
             default:
             break;
         }
@@ -53,12 +59,14 @@ function goAgain(){
     ]).then(function(choice){
         if(choice.goAgainChoice === "Yes"){
             start();
-        }else{
+        }
+        else{
             console.log("Thanks for doing Manager stuff!");
             connection.end();
         }
     })
 }
+
 function viewProdsForSale(){
     connection.query("SELECT * FROM products",function(error,result){
         if (error) throw error;
@@ -97,13 +105,16 @@ function viewLowInv(){
         goAgain();
     })
 }
+
 function addToInv(){
     var itemIds = [];
     var stocks = [];
     var names = [];
     connection.query("SELECT item_id,stock_quantity,product_name FROM products",function(error,result){
+
         if(error)throw error;
-        for(var i = 0; i<result.length; i++){
+
+        for(var i = 0; i < result.length; i++){
             itemIds.push(result[i].item_id.toString());
             stocks.push(result[i].stock_quantity);
             names.push(result[i].product_name);
@@ -180,7 +191,8 @@ function addNewProd(){
             name: "stock_quantity"
         }
     ]).then(function(response){
-        var obj = {
+        var obj = 
+        {
             product_name: response.product_name,
             department_name: response.department_name,
             price: parseFloat(response.price).toFixed(2),
