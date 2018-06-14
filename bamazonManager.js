@@ -99,38 +99,52 @@ function viewLowInv(){
     })
 }
 function addToInv(){
-    connection.query("SELECT item_id FROM products",function(error,result){
-        if (error) throw error;
-        var choiceArr = [];
-        for(var i = 0; i < result.length; i++){
-            choiceArr.push(result[i].item_id.toString());
+    var itemIds = [];
+    var stocks = [];
+    var names = [];
+    connection.query("SELECT item_id,stock_quantity,product_name FROM products",function(error,result){
+        if(error)throw error;
+        for(var i = 0; i<result.length; i++){
+            itemIds.push(result[i].item_id.toString());
+            stocks.push(result[i].stock_quantity);
+            names.push(result[i].product_name);
         }
         inquirer.prompt([
             {
                 type: "list",
                 message: "What is the ID of the item you want to stock?",
-                choices: choiceArr,
+                choices: itemIds,
                 name: "idChoice"
             },
             {
                 type: "input",
-                message: "How many would you like to add?",
+                message: "How much would you like to stock?",
                 validate: function(value){
                     if(!isNaN(value)){
                         return true;
-                    }
-                    return false
+                    }return false;
                 },
-                name: "quantity"
+                name:"quantity"
             }
         ]).then(function(response){
-            
-        connection.query("UPDATE products SET ? WHERE ?",
+            var index = itemIds.indexOf(response.idChoice);
+            var stockQuan = stocks[index];
+            var total = stockQuan + parseInt(response.quantity);
+            connection.query("UPDATE products SET ? WHERE ?",
             [
                 {
-                    stock_quantity: 1
+                    stock_quantity: total
+                },
+                {
+                    item_id: response.idChoice
                 }
-            ])
+            ],function(err){
+                if(err)throw err;
+                console.log(chalk.blue("YOU NOW HAVE " + total 
+                + " " + names[index] 
+                + "(s)"));
+                goAgain();
+            })
         })
     })
 }
