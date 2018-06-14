@@ -3,6 +3,8 @@ An amazon-like storefront using MySQL and Node.js
 
 https://drive.google.com/file/d/1ZA4W6fdkN8InFN9fl8oTK4LlGwxM3f99/view 
 
+Make sure your database is running before running this program
+
 ## bamazonCustomer.js Application
 The first part of the video above demonstrates this application.
 This application shows the user a list of items from a database. The list of items
