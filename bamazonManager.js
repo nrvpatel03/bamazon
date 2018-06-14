@@ -84,7 +84,6 @@ function viewLowInv(){
         if (error) throw error;
         var objectArr = [];
         for(var i = 0; i < result.length; i++){
-            choicesArr.push(result[i].item_id);
             var tableObject =
             {
                 ID: chalk.blue(result[i].item_id),
